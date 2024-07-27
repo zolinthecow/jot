@@ -20,6 +20,7 @@
     "node": ">=18"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["pnpm format", "turbo lint --"]
+    "*.{js,jsx,md}": ["pnpm format"],
+    "*.{ts,tsx}": ["pnpm format", "turbo lint --"]
   }
 }
