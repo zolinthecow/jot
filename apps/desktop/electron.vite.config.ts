@@ -25,5 +25,12 @@ export default defineConfig({
         generatedRouteTree: './src/renderer/src/routeTree.gen.ts',
       }),
     ],
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8000',
+        },
+      },
+    },
   },
 });

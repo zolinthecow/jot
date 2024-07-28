@@ -1,13 +1,29 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { type JSX, useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
 
 import { Button } from '@/components/ui/button';
+import { router } from '@renderer/main';
 import icon_dark from '@resources/icon_dark.svg';
 // import icon_light from '@resources/icon_light.svg';
 
-const Login: React.FC = () => {
+type LoginSearch = {
+  redirect: string;
+};
+
+export const Route = createFileRoute('/auth/login')({
+  validateSearch: (search: Record<string, unknown>): LoginSearch => {
+    return {
+      redirect: (search.redirect as string) || '/',
+    };
+  },
+  component: Login,
+});
+
+function Login(): JSX.Element {
+  const { redirect } = Route.useSearch();
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showError, setShowError] = useState<boolean>(false);
 
@@ -26,9 +42,10 @@ const Login: React.FC = () => {
       });
       setErrorMessage(null);
     } catch (err) {
-      console.error('[GOOGLE OAUTH ERROR]:', err);
+      console.error('[GITHUB OAUTH ERROR]:', err);
       setErrorMessage((err as Error).message);
     }
+    router.history.push(redirect);
   };
 
   return (
@@ -64,8 +81,4 @@ const Login: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export const Route = createFileRoute('/auth/login')({
-  component: Login,
-});
+}

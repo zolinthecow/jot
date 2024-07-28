@@ -28,11 +28,14 @@
     "clsx": "^2.1.1",
     "electron-updater": "^6.1.7",
     "lucide-react": "^0.416.0",
+    "replicache": "^15.0.1",
+    "replicache-react": "^5.0.1",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@repo/replicache-schema": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tanstack/router-devtools": "^1.45.11",
     "@tanstack/router-plugin": "^1.45.8",
