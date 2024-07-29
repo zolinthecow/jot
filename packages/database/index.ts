@@ -1,13 +1,37 @@
 import { z } from 'zod';
 
 export const DBWorkspaceSchema = z.object({
-    id: z.string(),
+    id: z.string().uuid(),
     userID: z.string().uuid(),
     path: z.string().min(1),
     name: z.string().min(1),
     createdAt: z.date(),
 });
 export type DBWorkspace = z.infer<typeof DBWorkspaceSchema>;
+
+export const DBFolderSchema = z.object({
+    id: z.string().uuid(),
+    userID: z.string().uuid(),
+    parentFolderId: z.string().uuid().optional(),
+    workspaceId: z.string().uuid(),
+    name: z.string(),
+    createdAt: z.date(),
+});
+export type DBFolder = z.infer<typeof DBFolderSchema>;
+
+export const DBFileSchema = z.object({
+    id: z.string().uuid(),
+    userID: z.string().uuid(),
+    workspaceID: z.string().uuid(),
+    parentFolderIDs: z.array(z.string().uuid()).optional(),
+    name: z.string(),
+    fileType: z.string(),
+    linkedFileID: z.string().uuid().optional(),
+    content: z.string(),
+    contentLink: z.string().optional(),
+    createdAt: z.date(),
+});
+export type DBFile = z.infer<typeof DBFileSchema>;
 
 // Replicache
 export const DBReplicacheClientGroupSchema = z.object({

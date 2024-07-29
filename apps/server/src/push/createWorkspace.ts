@@ -31,5 +31,7 @@ export default async function createWorkspace(
 
     return {
         workspaceIDs: [args.workspace.id],
+        folderIDs: [],
+        fileIDs: [],
     };
 }

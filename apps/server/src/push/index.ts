@@ -26,6 +26,8 @@ const PushRequestSchema = z.object({
 });
 export type Affected = {
     workspaceIDs: string[];
+    folderIDs: string[];
+    fileIDs: string[];
 };
 
 async function _handlePush(

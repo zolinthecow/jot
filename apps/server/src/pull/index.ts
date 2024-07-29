@@ -1,24 +1,16 @@
-import {
-    type DBReplicacheClientGroup,
-    type DBWorkspace,
-    DBWorkspaceSchema,
-} from '@repo/database';
+import type { DBReplicacheClientGroup, DBWorkspace } from '@repo/database';
 import type { AuthUser } from '@supabase/supabase-js';
 import type { NextFunction, Request, Response } from 'express';
-import type {
-    PatchOperation,
-    PullResponse,
-    PullResponseOKV1,
-    ReadonlyJSONValue,
-} from 'replicache';
-import { type DatabasePool, sql } from 'slonik';
+import type { PatchOperation, PullResponse } from 'replicache';
+import type { DatabasePool } from 'slonik';
 import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
 import { maybeGetWorkspace, searchWorkspaces } from '../utils/db';
+import { getAllFilesByID, searchFiles } from '../utils/db/file';
+import { getAllFoldersByID, searchFolders } from '../utils/db/folder';
 import {
     type CVR,
     type CVREntries,
-    type SearchResult,
     cvrEntriesFromSearch,
     diffCVR,
     getCVRFromCache,
@@ -46,7 +38,10 @@ type Entity = {
 };
 
 type CVRTx = {
-    entities: Record<string, { dels: Array<string>; puts: Array<Entity> }>;
+    entities: Record<
+        string,
+        { dels: Array<string>; puts: Readonly<Array<Entity>> }
+    >;
     clients: CVREntries;
     nextCVR: CVR;
     nextCVRVersion: number;
@@ -76,17 +71,23 @@ export async function _handlePull(
         );
 
         const userWorkspaceSearch = await searchWorkspaces(tx, [userID]);
+        const userFolderSearch = await searchFolders(tx, { userID });
+        const userFileSearch = await searchFiles(tx, { userID });
         const clientMeta = await searchClients(tx, clientGroupID);
 
         console.log('GOT SEARCH RESULTS:', {
             baseClientGroupRecord,
             clientMeta,
             userWorkspaceSearch,
+            userFileSearch,
+            userFolderSearch,
         });
 
         // Build next CVR
         const nextCVR: CVR = {
             workspace: cvrEntriesFromSearch(userWorkspaceSearch),
+            folders: cvrEntriesFromSearch(userFolderSearch),
+            files: cvrEntriesFromSearch(userFileSearch),
             client: cvrEntriesFromSearch(clientMeta),
         };
         console.log('NEXT CVR:', nextCVR);
@@ -106,6 +107,10 @@ export async function _handlePull(
         if (userWorkspace) {
             newWorkspace.push(userWorkspace);
         }
+        const newFiles = await getAllFilesByID(tx, { IDs: diff.files.puts });
+        const newFolders = await getAllFoldersByID(tx, {
+            IDs: diff.folders.puts,
+        });
 
         // Get list of clients that are changed
         const clients: CVREntries = {};
@@ -135,6 +140,14 @@ export async function _handlePull(
                 workspace: {
                     dels: diff.workspace.dels,
                     puts: newWorkspace,
+                },
+                folders: {
+                    dels: diff.folders.dels,
+                    puts: newFolders,
+                },
+                files: {
+                    dels: diff.files.dels,
+                    puts: newFiles,
                 },
             },
             clients,

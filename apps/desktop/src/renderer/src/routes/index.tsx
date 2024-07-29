@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import CreateWorkspaceDialog from '@renderer/components/CreateWorkspacePopover';
 import type { ReplicacheWorkspace } from '@repo/replicache-schema';
 import {
@@ -8,7 +7,7 @@ import {
     useRouteContext,
 } from '@tanstack/react-router';
 import type { JSX } from 'react';
-import type { ReadTransaction, Replicache } from 'replicache';
+import type { ReadTransaction } from 'replicache';
 import { useSubscribe } from 'replicache-react';
 
 async function getWorkspace(tx: ReadTransaction) {

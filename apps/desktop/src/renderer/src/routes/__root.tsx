@@ -3,13 +3,7 @@ import type { M } from '@/lib/replicache/mutators';
 import { supabase } from '@/lib/supabase';
 import { router } from '@renderer/main';
 import type { Session } from '@supabase/supabase-js';
-import {
-    Link,
-    Outlet,
-    createRootRoute,
-    createRootRouteWithContext,
-    redirect,
-} from '@tanstack/react-router';
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { useEffect } from 'react';
 import type { Replicache } from 'replicache';
