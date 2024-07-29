@@ -46,12 +46,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
                     }
                 } else if (event === 'SIGNED_OUT') {
                     router.invalidate();
+                    router.history.push('/auth/login');
                 } else if (
                     event === 'TOKEN_REFRESHED' &&
                     session &&
                     context.replicache
                 ) {
-                    router.invalidate();
+                    // router.invalidate();
                 }
             });
 
