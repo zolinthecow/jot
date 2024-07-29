@@ -14,6 +14,7 @@
     "license": "ISC",
     "dependencies": {
         "@repo/database": "workspace:*",
+        "@repo/replicache-schema": "workspace:*",
         "@repo/typescript-config": "workspace:*",
         "@supabase/supabase-js": "^2.44.4",
         "dotenv": "^16.4.5",
@@ -21,7 +22,7 @@
         "nodemon": "^3.1.4",
         "replicache": "^15.0.1",
         "slonik": "^45.6.0",
-        "ulid": "^2.3.0",
+        "uuid": "^10.0.0",
         "zod": "^3.23.8"
     },
     "devDependencies": {
@@ -30,6 +31,7 @@
         "@swc/core": "^1.7.3",
         "@types/express": "^4.17.21",
         "@types/node": "^20.14.8",
+        "@types/uuid": "^10.0.0",
         "cross-env": "^7.0.3",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.4"

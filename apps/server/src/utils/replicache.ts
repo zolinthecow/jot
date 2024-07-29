@@ -1,5 +1,5 @@
 import {
-    DBReplicacheClient,
+    type DBReplicacheClient,
     type DBReplicacheClientGroup,
     DBReplicacheClientGroupSchema,
     DBReplicacheClientSchema,
@@ -138,4 +138,55 @@ export async function searchClients(
         WHERE "clientGroupID" = ${clientGroupID}
     `);
     return clients;
+}
+
+type Client = Omit<DBReplicacheClient, 'createdAt'>;
+export async function getClient(
+    tx: DatabaseTransactionConnection,
+    clientID: string,
+    clientGroupID: string,
+): Promise<Client> {
+    const client = await tx.maybeOne(sql.type(DBReplicacheClientSchema)`
+        SELECT id, "clientGroupID", "lastMutationID", "createdAt"
+        FROM replicache_clients
+        WHERE id = ${clientID}
+    `);
+    if (!client) {
+        return {
+            id: clientID,
+            clientGroupID: '',
+            lastMutationID: 0,
+        };
+    }
+    if (client.clientGroupID !== clientGroupID) {
+        throw new Error('Client group must own client');
+    }
+    return {
+        id: client.id,
+        clientGroupID: client.clientGroupID,
+        lastMutationID: client.lastMutationID,
+    };
+}
+
+export async function putClient(
+    tx: DatabaseTransactionConnection,
+    client: Client,
+): Promise<void> {
+    await tx.maybeOne(sql.type(DBReplicacheClientSchema)`
+        INSERT INTO replicache_clients (
+            id,
+            "clientGroupID",
+            "lastMutationID",
+            "createdAt"
+        ) VALUES (
+            ${client.id},
+            ${client.clientGroupID},
+            ${client.lastMutationID},
+            CURRENT_TIMESTAMP
+        )
+        ON CONFLICT (id) DO UPDATE SET
+            "clientGroupID" = EXCLUDED."clientGroupID",
+            "lastMutationID" = EXCLUDED."lastMutationID"
+        RETURNING *
+    `);
 }

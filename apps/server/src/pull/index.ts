@@ -12,9 +12,9 @@ import type {
     ReadonlyJSONValue,
 } from 'replicache';
 import { type DatabasePool, sql } from 'slonik';
-import { ulid } from 'ulid';
+import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
-import { maybeGetWorkspace, searchWorkspaces } from './utils/db';
+import { maybeGetWorkspace, searchWorkspaces } from '../utils/db';
 import {
     type CVR,
     type CVREntries,
@@ -27,7 +27,7 @@ import {
     putClientGroup,
     searchClients,
     upsertCVRInCache,
-} from './utils/replicache';
+} from '../utils/replicache';
 
 const CookieSchema = z.object({
     order: z.number(),
@@ -154,7 +154,7 @@ export async function _handlePull(
 
     const { entities, clients, nextCVR, nextCVRVersion } = txRes;
 
-    const cvrID = ulid();
+    const cvrID = uuid();
     upsertCVRInCache(cvrID, nextCVR);
 
     const patch: PatchOperation[] = [];
@@ -209,6 +209,6 @@ export async function handlePull(
         res.status(200).json(pullResult);
     } catch (err) {
         console.error('[ERROR IN PULL]:', err);
-        res.status(500).json('Internal server error');
+        res.status(500).send('Internal server error');
     }
 }

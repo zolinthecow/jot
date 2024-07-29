@@ -1,20 +1,19 @@
 import { Button } from '@/components/ui/button';
 import CreateWorkspaceDialog from '@renderer/components/CreateWorkspacePopover';
-import type { Workspace } from '@repo/replicache-schema';
+import type { ReplicacheWorkspace } from '@repo/replicache-schema';
 import {
     createFileRoute,
     redirect,
     useLoaderData,
+    useRouteContext,
 } from '@tanstack/react-router';
 import type { JSX } from 'react';
 import type { ReadTransaction, Replicache } from 'replicache';
 import { useSubscribe } from 'replicache-react';
 
-let r: Replicache;
-
 async function getWorkspace(tx: ReadTransaction) {
     const workspace = await tx
-        .scan<Workspace>({ prefix: 'workspace' })
+        .scan<ReplicacheWorkspace>({ prefix: 'workspace' })
         .values()
         .toArray();
     return workspace[0];
@@ -47,15 +46,23 @@ export const Route = createFileRoute('/')({
 });
 
 function Index(): JSX.Element {
+    const context = useRouteContext({ from: '/' });
+    const r = context.replicache;
+    const session = context.session;
+
     const loaderData = useLoaderData({ from: '/' });
     const workspace = useSubscribe(r, getWorkspace, {
         default: loaderData.workspace,
     });
 
+    if (r == null || session == null) {
+        return <div />;
+    }
+
     return (
         <div className="w-full h-full flex">
             {workspace == null ? (
-                <CreateWorkspaceDialog />
+                <CreateWorkspaceDialog r={r} session={session} />
             ) : (
                 <div>{workspace.path}</div>
             )}

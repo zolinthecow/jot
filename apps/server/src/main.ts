@@ -8,6 +8,7 @@ import express, {
 import { type DatabasePool, createPool } from 'slonik';
 
 import { handlePull } from './pull';
+import { handlePush } from './push';
 import { supabase } from './utils/supabase';
 
 const POSTGRES_URL = process.env.POSTGRES_URL as string;
@@ -73,6 +74,7 @@ const main = async () => {
     app.use(authMiddleware);
 
     app.post('/api/replicache/pull', createHandlerWithPool(pool, handlePull));
+    app.post('/api/replicache/push', createHandlerWithPool(pool, handlePush));
 
     app.listen(port, () => {
         console.log(`Listening on port ${port}`);

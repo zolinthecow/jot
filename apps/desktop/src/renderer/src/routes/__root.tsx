@@ -1,4 +1,5 @@
 import { getReplicache } from '@/lib/replicache';
+import type { M } from '@/lib/replicache/mutators';
 import { supabase } from '@/lib/supabase';
 import { router } from '@renderer/main';
 import type { Session } from '@supabase/supabase-js';
@@ -15,7 +16,7 @@ import type { Replicache } from 'replicache';
 
 export interface RouterContext {
     session: Session | null;
-    replicache: Replicache | null;
+    replicache: Replicache<M> | null;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -23,7 +24,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         const {
             data: { session },
         } = await supabase.auth.getSession();
-        let replicache: Replicache | null = null;
+        let replicache: Replicache<M> | null = null;
 
         if (session) {
             replicache = getReplicache({

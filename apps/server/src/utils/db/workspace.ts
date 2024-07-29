@@ -10,9 +10,9 @@ export async function searchWorkspaces(
     if (params.length === 0) return [];
 
     const searchResults = await tx.any(sql.type(SearchResultSchema)`
-        SELECT id, version as rowversion
+        SELECT id, xmin AS rowversion
         FROM workspaces
-        WHERE "userID" in ${params}
+        WHERE "userID" = ANY(${sql.array(params, 'text')})
     `);
     return searchResults;
 }
@@ -31,13 +31,13 @@ export async function maybeGetWorkspace(
     let workspace: DBWorkspace | null;
     if ('userID' in params) {
         workspace = await tx.maybeOne(sql.type(DBWorkspaceSchema)`
-            SELECT id "userID", "path", "createdAt", "version"
+            SELECT id "userID", "path", "createdAt"
             FROM workspaces
             WHERE "userID" = ${params.userID}
         `);
     } else {
         workspace = await tx.maybeOne(sql.type(DBWorkspaceSchema)`
-            SELECT id "userID", "path", "createdAt", "version"
+            SELECT id "userID", "path", "createdAt"
             FROM workspaces
             WHERE id = ${params.id}
         `);

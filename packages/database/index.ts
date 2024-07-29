@@ -2,10 +2,10 @@ import { z } from 'zod';
 
 export const DBWorkspaceSchema = z.object({
     id: z.string(),
-    userId: z.string().uuid(),
+    userID: z.string().uuid(),
     path: z.string().min(1),
+    name: z.string().min(1),
     createdAt: z.date(),
-    version: z.number().int().nonnegative(),
 });
 export type DBWorkspace = z.infer<typeof DBWorkspaceSchema>;
 
