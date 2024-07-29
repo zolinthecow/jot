@@ -19,29 +19,11 @@ async function getWorkspace(tx: ReadTransaction) {
 }
 
 export const Route = createFileRoute('/')({
-  beforeLoad: async ({ location }) => {
-    console.log('A');
-    const session = await supabase.auth.getSession();
-    console.log('B');
-    if (!session.data.session) {
-      throw redirect({
-        to: '/auth/login',
-        search: {
-          redirect: location.href,
-        },
-      });
-    }
-    console.log('C');
-    return { session: session.data.session };
-  },
   loader: async ({ context }) => {
-    console.log('D');
-    const session = context.session;
-    r = getReplicache(session.user.id, session.access_token, true);
-    console.log('E');
+    const r = context.replicache;
+    if (!r) return;
 
     const workspace = (await r.query(getWorkspace)) ?? null;
-    console.log('G');
 
     return {
       workspace,
@@ -55,12 +37,6 @@ function Index(): JSX.Element {
   const workspace = useSubscribe(r, getWorkspace, {
     default: loaderData.workspace,
   });
-
-  useEffect(() => {
-    return () => {
-      void r.close();
-    };
-  }, []);
 
   return (
     <div className="w-full h-full flex">

@@ -19,7 +19,9 @@
     "express": "^4.19.2",
     "nodemon": "^3.1.4",
     "replicache": "^15.0.1",
-    "slonik": "^45.6.0"
+    "slonik": "^45.6.0",
+    "ulid": "^2.3.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@swc-node/register": "^1.10.9",

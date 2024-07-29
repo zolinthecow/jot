@@ -5,9 +5,16 @@ import type React from 'react';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 
+import { getReplicache } from '@/lib/replicache';
 import { routeTree } from './routeTree.gen';
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({
+  routeTree,
+  context: {
+    session: null,
+    replicache: null,
+  },
+});
 
 declare module '@tanstack/react-router' {
   interface Register {
