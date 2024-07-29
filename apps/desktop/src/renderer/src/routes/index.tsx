@@ -1,13 +1,12 @@
 import { Button } from '@/components/ui/button';
-import { getReplicache } from '@/lib/replicache';
-import { supabase } from '@/lib/supabase';
+import CreateWorkspaceDialog from '@renderer/components/CreateWorkspacePopover';
 import type { Workspace } from '@repo/replicache-schema';
 import {
     createFileRoute,
     redirect,
     useLoaderData,
 } from '@tanstack/react-router';
-import { type JSX, useEffect } from 'react';
+import type { JSX } from 'react';
 import type { ReadTransaction, Replicache } from 'replicache';
 import { useSubscribe } from 'replicache-react';
 
@@ -56,11 +55,7 @@ function Index(): JSX.Element {
     return (
         <div className="w-full h-full flex">
             {workspace == null ? (
-                <div className="flex w-full h-full items-center justify-center">
-                    <Button variant="default" className="w-48 h-12">
-                        Create Your Workspace
-                    </Button>
-                </div>
+                <CreateWorkspaceDialog />
             ) : (
                 <div>{workspace.path}</div>
             )}

@@ -14,7 +14,7 @@ import type {
 import { type DatabasePool, sql } from 'slonik';
 import { ulid } from 'ulid';
 import { z } from 'zod';
-import { getUserWorkspace } from '../utils/db';
+import { getUserWorkspace } from './utils/db';
 import {
     type CVR,
     type CVREntries,
@@ -27,7 +27,7 @@ import {
     putClientGroup,
     searchClients,
     upsertCVRInCache,
-} from '../utils/replicache';
+} from './utils/replicache';
 
 const CookieSchema = z.object({
     order: z.number(),
@@ -52,7 +52,7 @@ type CVRTx = {
     nextCVRVersion: number;
 } | null;
 
-export async function handleWorkspaceGet(
+export async function _handlePull(
     pool: DatabasePool,
     userID: string,
     requestBody: PullRequest,
@@ -208,7 +208,7 @@ export async function handlePull(
     next: NextFunction,
 ): Promise<void> {
     try {
-        const pullResult = await handleWorkspaceGet(
+        const pullResult = await _handlePull(
             pool,
             (res.locals.user as AuthUser).id,
             req.body,

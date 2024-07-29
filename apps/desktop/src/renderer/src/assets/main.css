@@ -15,14 +15,14 @@
     --secondary: #6BA7D1;
     --secondary-foreground: #F0F0F0;
     --muted: #839496;
-    --muted-foreground: #EEE8D5;
+    --muted-foreground: #93A1A1;
     --accent: #26D1A9;
     --accent-foreground: #F0F0F0;
     --destructive: #DC322F;
     --destructive-foreground: #F0F0F0;
     --border: #073642;
-    --input: #073642;
-    --ring: #073642;
+    --input: #839496;
+    --ring: #657b83;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
