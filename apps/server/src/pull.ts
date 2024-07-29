@@ -14,7 +14,7 @@ import type {
 import { type DatabasePool, sql } from 'slonik';
 import { ulid } from 'ulid';
 import { z } from 'zod';
-import { getUserWorkspace } from './utils/db';
+import { maybeGetWorkspace, searchWorkspaces } from './utils/db';
 import {
     type CVR,
     type CVREntries,
@@ -75,24 +75,16 @@ export async function _handlePull(
             userID,
         );
 
-        const userWorkspace = await getUserWorkspace(tx, { userId: userID });
+        const userWorkspaceSearch = await searchWorkspaces(tx, [userID]);
         const clientMeta = await searchClients(tx, clientGroupID);
 
         console.log('GOT SEARCH RESULTS:', {
             baseClientGroupRecord,
             clientMeta,
-            userWorkspace,
+            userWorkspaceSearch,
         });
 
         // Build next CVR
-        const userWorkspaceSearch: Array<SearchResult> = [];
-        if (userWorkspace) {
-            userWorkspaceSearch.push({
-                id: userWorkspace.id,
-                rowversion: userWorkspace.version,
-            });
-        }
-
         const nextCVR: CVR = {
             workspace: cvrEntriesFromSearch(userWorkspaceSearch),
             client: cvrEntriesFromSearch(clientMeta),
@@ -108,8 +100,9 @@ export async function _handlePull(
             return null;
         }
 
-        // Already got the entities from the workspace query
+        // Get actual entities that should be updated
         const newWorkspace: Array<DBWorkspace> = [];
+        const userWorkspace = await maybeGetWorkspace(tx, { userID });
         if (userWorkspace) {
             newWorkspace.push(userWorkspace);
         }
