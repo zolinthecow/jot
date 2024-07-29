@@ -1,4 +1,9 @@
-import { CreateWorkspaceArgsSchema } from '@repo/replicache-schema';
+import {
+    CreateFolderArgsSchema,
+    CreateWorkspaceArgsSchema,
+    DeleteFolderArgsSchema,
+    UpdateFolderArgsSchema,
+} from '@repo/replicache-schema';
 import type { AuthUser } from '@supabase/supabase-js';
 import type { NextFunction, Request, Response } from 'express';
 import type { ReadonlyJSONValue } from 'replicache';
@@ -11,6 +16,7 @@ import {
     putClientGroup,
 } from '../utils/replicache';
 import createWorkspace from './createWorkspace';
+import { createFolder, deleteFolder, updateFolder } from './folder';
 
 const MutationSchema = z.object({
     id: z.number(),
@@ -100,6 +106,8 @@ async function processMutation(
     return await pool.transaction<Affected>(async (tx) => {
         let affected: Affected = {
             workspaceIDs: [],
+            folderIDs: [],
+            fileIDs: [],
         };
 
         console.log(
@@ -170,9 +178,29 @@ async function mutate(
                 userID,
                 CreateWorkspaceArgsSchema.parse(mutation.args),
             );
+        case 'createFolder':
+            return await createFolder(
+                tx,
+                userID,
+                CreateFolderArgsSchema.parse(mutation.args),
+            );
+        case 'updateFolder':
+            return await updateFolder(
+                tx,
+                userID,
+                UpdateFolderArgsSchema.parse(mutation.args),
+            );
+        case 'deleteFolder':
+            return await deleteFolder(
+                tx,
+                userID,
+                DeleteFolderArgsSchema.parse(mutation.args),
+            );
         default:
             return {
                 workspaceIDs: [],
+                folderIDs: [],
+                fileIDs: [],
             };
     }
 }

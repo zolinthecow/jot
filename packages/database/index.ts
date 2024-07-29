@@ -12,8 +12,8 @@ export type DBWorkspace = z.infer<typeof DBWorkspaceSchema>;
 export const DBFolderSchema = z.object({
     id: z.string().uuid(),
     userID: z.string().uuid(),
-    parentFolderId: z.string().uuid().optional(),
-    workspaceId: z.string().uuid(),
+    parentFolderID: z.string().uuid().optional(),
+    workspaceID: z.string().uuid(),
     name: z.string(),
     createdAt: z.date(),
 });

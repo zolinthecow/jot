@@ -7,7 +7,7 @@ import {
 import {
     type CreateFolderArgs,
     CreateFolderArgsSchema,
-    DeleteFolderArgs,
+    type DeleteFolderArgs,
     DeleteFolderArgsSchema,
     ReplicacheFolder,
     ReplicacheFolderSchema,
@@ -15,6 +15,7 @@ import {
     UpdateFolderArgsSchema,
 } from '@repo/replicache-schema';
 import { type DatabaseTransactionConnection, sql } from 'slonik';
+import { z } from 'zod';
 import type { Affected } from '.';
 
 export async function createFolder(
@@ -26,16 +27,16 @@ export async function createFolder(
         throw new Error('User IDs dont match');
     }
 
-    const hasParentFolder = args.folder.parentFolderId !== undefined;
+    const hasParentFolder = args.folder.parentFolderID !== undefined;
     await tx.one(sql.type(DBFolderSchema)`
         ${
-            args.folder.parentFolderId != null
+            args.folder.parentFolderID != null
                 ? sql.type(DBFolderSchema)`
         WITH parent_check AS (
             SELECT 1
             FROM folders
-            WHERE id = ${args.folder.parentFolderId}
-            AND "workspaceId" = ${args.folder.workspaceId}
+            WHERE id = ${args.folder.parentFolderID}
+            AND "workspaceID" = ${args.folder.workspaceID}
         )
         `
                 : sql.fragment``
@@ -43,16 +44,16 @@ export async function createFolder(
         INSERT INTO folders (
             id,
             "userID",
-            "workspaceId",
-            "parentFolderId",
+            "workspaceID",
+            "parentFolderID",
             name,
             "createdAt"
         )
         SELECT
             ${args.folder.id},
             ${args.folder.userID},
-            ${args.folder.workspaceId},
-            ${args.folder.parentFolderId ?? sql.fragment`NULL`},
+            ${args.folder.workspaceID},
+            ${args.folder.parentFolderID ?? sql.fragment`NULL`},
             ${args.folder.name},
             CURRENT_TIMESTAMP
         ${
@@ -66,9 +67,9 @@ export async function createFolder(
     `);
 
     return {
-        workspaceIDs: [args.folder.workspaceId],
-        folderIDs: args.folder.parentFolderId
-            ? [args.folder.parentFolderId]
+        workspaceIDs: [args.folder.workspaceID],
+        folderIDs: args.folder.parentFolderID
+            ? [args.folder.parentFolderID]
             : [],
         fileIDs: [],
     };
@@ -86,11 +87,11 @@ export async function updateFolder(
         updateFields.push(sql.typeAlias('name')`"name" = ${args.update.name}`);
     }
 
-    if (args.update.parentFolderId !== undefined) {
+    if (args.update.parentFolderID !== undefined) {
         updateFields.push(
             sql.typeAlias(
                 'parentFolderID',
-            )`"parentFolderId" = ${args.update.parentFolderId}`,
+            )`"parentFolderID" = ${args.update.parentFolderID}`,
         );
     }
 
@@ -104,14 +105,14 @@ export async function updateFolder(
 
     const updatedFolder = await tx.one(sql.type(DBFolderSchema)`
         WITH folder_check AS (
-            SELECT "workspaceId"
+            SELECT "workspaceID"
             FROM folders
             WHERE id = ${folderID} AND "userID" = ${userID}
         ), parent_check AS (
             SELECT 1
             FROM folders
-            WHERE id = ${args.update.parentFolderId}
-            AND "workspaceId" = (SELECT "workspaceId" FROM folder_check)
+            WHERE id = ${args.update.parentFolderID ?? sql.fragment`NULL`}
+            AND "workspaceID" = (SELECT "workspaceID" FROM folder_check)
         )
         UPDATE folders
         SET ${sql.join(updateFields, sql.fragment`, `)}
@@ -119,7 +120,7 @@ export async function updateFolder(
           AND "userID" = ${userID}
           AND (
               ${
-                  args.update.parentFolderId === undefined
+                  args.update.parentFolderID === undefined
                       ? sql.fragment`TRUE`
                       : sql.fragment`
               EXISTS (SELECT 1 FROM parent_check)
@@ -130,12 +131,84 @@ export async function updateFolder(
     `);
 
     const folderIDsUpdated = [updatedFolder.id];
-    if (args.update.parentFolderId) {
-        folderIDsUpdated.push(args.update.parentFolderId);
+    if (args.update.parentFolderID) {
+        folderIDsUpdated.push(args.update.parentFolderID);
     }
     return {
-        workspaceIDs: [updatedFolder.workspaceId],
+        workspaceIDs: [updatedFolder.workspaceID],
         folderIDs: folderIDsUpdated,
         fileIDs: [],
+    };
+}
+
+export async function deleteFolder(
+    tx: DatabaseTransactionConnection,
+    userID: string,
+    args: DeleteFolderArgs,
+): Promise<Affected> {
+    const DeleteResultSchema = z.object({
+        workspaceID: z.string().uuid(),
+        deletedFolders: z.array(z.string().uuid()),
+        deletedFiles: z.array(z.string().uuid()),
+    });
+
+    const result = await tx.one(sql.type(DeleteResultSchema)`
+        WITH RECURSIVE
+        root_folder AS (
+            SELECT id, "workspaceID"
+            FROM folders
+            WHERE id = ${args.id} AND "userID" = ${userID}
+        ),
+        folder_tree AS (
+            SELECT id, "parentFolderID", "workspaceID"
+            FROM root_folder
+            UNION ALL
+            SELECT f.id, f."parentFolderID", f."workspaceID"
+            FROM folders f
+            JOIN folder_tree ft ON f."parentFolderID" = ft.id
+        ),
+        deleted_folders AS (
+            DELETE FROM folders
+            WHERE id IN (SELECT id FROM folder_tree)
+            RETURNING id
+        ),
+        orphaned_files AS (
+            SELECT f.id
+            FROM files f
+            WHERE f."parentFolderIDs" && (SELECT ARRAY_AGG(id) FROM deleted_folders)
+            AND NOT EXISTS (
+                SELECT 1
+                FROM unnest(f."parentFolderIDs") AS folder_id
+                WHERE folder_id NOT IN (SELECT id FROM deleted_folders)
+            )
+        ),
+        deleted_files AS (
+            DELETE FROM files
+            WHERE id IN (SELECT id FROM orphaned_files)
+            RETURNING id
+        ),
+        updated_files AS (
+            UPDATE files
+            SET "parentFolderIDs" = ARRAY(
+                SELECT unnest("parentFolderIDs")
+                EXCEPT
+                SELECT id FROM deleted_folders
+            )
+            WHERE "parentFolderIDs" && (SELECT ARRAY_AGG(id) FROM deleted_folders)
+            AND id NOT IN (SELECT id FROM deleted_files)
+        )
+        SELECT 
+            (SELECT "workspaceID" FROM root_folder) AS "workspaceID",
+            COALESCE(ARRAY_AGG(DISTINCT df.id), ARRAY[]::uuid[]) AS "deletedFolders",
+            COALESCE(ARRAY_AGG(DISTINCT dfl.id), ARRAY[]::uuid[]) AS "deletedFiles"
+        FROM (SELECT 1) AS dummy
+        LEFT JOIN deleted_folders df ON true
+        LEFT JOIN deleted_files dfl ON true
+    `);
+
+    return {
+        workspaceIDs: [result.workspaceID],
+        folderIDs: result.deletedFolders,
+        fileIDs: result.deletedFiles,
     };
 }
