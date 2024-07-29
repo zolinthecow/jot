@@ -3,6 +3,7 @@ import {
     CreateWorkspaceArgsSchema,
 } from '@repo/replicache-schema';
 import type { WriteTransaction } from 'replicache';
+import { createFolder, deleteFolder, updateFolder } from './folder';
 
 export type M = typeof mutators;
 
@@ -14,4 +15,7 @@ export const mutators = {
         const args = CreateWorkspaceArgsSchema.parse(_args);
         await tx.set(`workspace/${args.workspace.id}`, args.workspace);
     },
+    createFolder,
+    updateFolder,
+    deleteFolder,
 };

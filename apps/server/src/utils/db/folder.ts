@@ -12,22 +12,22 @@ export async function searchFolders(
     const searchResults = await tx.any(sql.type(SearchResultSchema)`
         SELECT id, xmin AS rowversion
         FROM folders
-        WHERE "userID" = ${params.userID}
+        WHERE "userID" = ${params.userID}::uuid
     `);
     return searchResults;
 }
 
-type GetAllWorkspaceFoldersParams = {
+type GetAllUserFoldersParams = {
     userID: string;
 };
-export async function maybeGetWorkspace(
+export async function getAllUserFolders(
     tx: DatabaseTransactionConnection,
-    params: GetAllWorkspaceFoldersParams,
+    params: GetAllUserFoldersParams,
 ): Promise<Readonly<Array<DBFolder>>> {
     return await tx.any(sql.type(DBFolderSchema)`
         SELECT id, "parentFolderID", "workspaceID", name, "createdAt"
         FROM folders
-        WHERE "workspaceID" = ${params.userID}
+        WHERE "workspaceID" = ${params.userID}::uuid
     `);
 }
 
@@ -41,6 +41,6 @@ export async function getAllFoldersByID(
     return await tx.any(sql.type(DBFolderSchema)`
         SELECT id, "parentFolderID", "workspaceID", name, "createdAt"
         FROM folders
-        WHERE id = ANY(${sql.array(params.IDs, 'text')})
+        WHERE id = ANY(${sql.array(params.IDs, 'uuid')})
     `);
 }

@@ -33,7 +33,7 @@ export type CreateWorkspaceArgs = z.infer<typeof CreateWorkspaceArgsSchema>;
 export const ReplicacheFolderSchema = DBFolderSchema.omit({
     createdAt: true,
 });
-export type ReplicacheFolder = z.infer<typeof ReplicacheWorkspaceSchema>;
+export type ReplicacheFolder = z.infer<typeof ReplicacheFolderSchema>;
 
 export const CreateFolderArgsSchema = z.object({
     folder: ReplicacheFolderSchema,

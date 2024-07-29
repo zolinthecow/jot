@@ -12,7 +12,7 @@ export async function searchFiles(
     const searchResults = await tx.any(sql.type(SearchResultSchema)`
         SELECT id, xmin AS rowversion
         FROM files
-        WHERE "userID" = ${params.userID}
+        WHERE "userID" = ${params.userID}::uuid
     `);
     return searchResults;
 }
@@ -27,7 +27,7 @@ export async function getAllUserFiles(
     return await tx.any(sql.type(DBFileSchema)`
         SELECT id, "workspaceID", "parentFolderIDs", name, "fileType", "linkedFileID", "content", "contentLink", "createdAt"
         FROM files
-        WHERE "userID" = ${params.userID}
+        WHERE "userID" = ${params.userID}::uuid
     `);
 }
 
@@ -41,6 +41,6 @@ export async function getAllFilesByID(
     return await tx.any(sql.type(DBFileSchema)`
         SELECT id, "workspaceID", "parentFolderIDs", name, "fileType", "linkedFileID", "content", "contentLink", "createdAt"
         FROM files
-        WHERE id = ANY(${sql.array(params.IDs, 'text')})
+        WHERE id = ANY(${sql.array(params.IDs, 'uuid')})
     `);
 }

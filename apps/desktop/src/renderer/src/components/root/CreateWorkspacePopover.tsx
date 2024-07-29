@@ -54,7 +54,7 @@ const CreateWorkspaceDialog: React.FC<Props> = ({ r, session }) => {
     };
 
     return (
-        <div className="flex w-full h-full items-center justify-center">
+        <div className="flex w-full h-full items-center justify-center bg-background rounded-md">
             <div
                 className={`fixed z-[75] top-0 left-0 right-0 transition-transform duration-300 ease-in-out ${showAlert ? 'translate-y-0' : '-translate-y-full'}`}
             >

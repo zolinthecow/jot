@@ -5,9 +5,14 @@ import type { PatchOperation, PullResponse } from 'replicache';
 import type { DatabasePool } from 'slonik';
 import { v4 as uuid } from 'uuid';
 import { z } from 'zod';
-import { maybeGetWorkspace, searchWorkspaces } from '../utils/db';
-import { getAllFilesByID, searchFiles } from '../utils/db/file';
-import { getAllFoldersByID, searchFolders } from '../utils/db/folder';
+import {
+    getAllFilesByID,
+    getAllFoldersByID,
+    maybeGetWorkspace,
+    searchFiles,
+    searchFolders,
+    searchWorkspaces,
+} from '../utils/db';
 import {
     type CVR,
     type CVREntries,

@@ -1,5 +1,10 @@
-import CreateWorkspaceDialog from '@renderer/components/CreateWorkspacePopover';
-import type { ReplicacheWorkspace } from '@repo/replicache-schema';
+import CreateWorkspaceDialog from '@renderer/components/root/CreateWorkspacePopover';
+import WorkspaceHome from '@renderer/components/root/WorkspaceHome';
+import type {
+    ReplicacheFile,
+    ReplicacheFolder,
+    ReplicacheWorkspace,
+} from '@repo/replicache-schema';
 import {
     createFileRoute,
     redirect,
@@ -11,11 +16,26 @@ import type { ReadTransaction } from 'replicache';
 import { useSubscribe } from 'replicache-react';
 
 async function getWorkspace(tx: ReadTransaction) {
-    const workspace = await tx
+    const workspaces = await tx
         .scan<ReplicacheWorkspace>({ prefix: 'workspace' })
         .values()
         .toArray();
-    return workspace[0];
+    if (workspaces.length === 0) return null;
+    return workspaces[0];
+}
+async function getFolders(tx: ReadTransaction) {
+    const folders = await tx
+        .scan<ReplicacheFolder>({ prefix: 'folder/' })
+        .values()
+        .toArray();
+    return folders;
+}
+async function getFiles(tx: ReadTransaction) {
+    const files = await tx
+        .scan<ReplicacheFile>({ prefix: 'file/' })
+        .values()
+        .toArray();
+    return files;
 }
 
 export const Route = createFileRoute('/')({
@@ -31,14 +51,23 @@ export const Route = createFileRoute('/')({
     },
     loader: async ({ context }) => {
         const r = context.replicache;
-        if (!r) return {};
+        if (!r)
+            return {
+                workspace: null,
+                folders: [],
+                files: [],
+            };
 
-        console.log('QUERYING WORKSPACE');
-        const workspace = (await r.query(getWorkspace)) ?? null;
-        console.log('GOT WORKSPACE');
+        const [workspace, folders, files] = await Promise.all([
+            r.query(getWorkspace),
+            r.query(getFolders),
+            r.query(getFiles),
+        ]);
 
         return {
             workspace,
+            folders,
+            files,
         };
     },
     component: Index,
@@ -53,17 +82,27 @@ function Index(): JSX.Element {
     const workspace = useSubscribe(r, getWorkspace, {
         default: loaderData.workspace,
     });
+    const folders = useSubscribe(r, getFolders, {
+        default: loaderData.folders,
+    });
+    const files = useSubscribe(r, getFiles, {
+        default: loaderData.files,
+    });
 
     if (r == null || session == null) {
         return <div />;
     }
 
     return (
-        <div className="w-full h-full flex">
+        <div className="w-full h-full flex bg-muted p-2">
             {workspace == null ? (
                 <CreateWorkspaceDialog r={r} session={session} />
             ) : (
-                <div>{workspace.path}</div>
+                <WorkspaceHome
+                    workspace={workspace}
+                    folders={folders}
+                    files={files}
+                />
             )}
         </div>
     );
