@@ -25,7 +25,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         } = await supabase.auth.getSession();
         let replicache: Replicache | null = null;
 
-        console.log('AUTH INIT', session);
         if (session) {
             replicache = getReplicache({
                 name: session.user.id,

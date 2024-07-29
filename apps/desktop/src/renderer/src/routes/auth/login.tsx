@@ -24,6 +24,7 @@ export const Route = createFileRoute('/auth/login')({
 function Login(): JSX.Element {
     const { redirect } = Route.useSearch();
 
+    const [loading, setLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [showError, setShowError] = useState<boolean>(false);
 
@@ -36,6 +37,7 @@ function Login(): JSX.Element {
     }, [errorMessage]);
 
     const signInOrSignUp = async (): Promise<void> => {
+        setLoading(true);
         try {
             await supabase.auth.signInWithOAuth({
                 provider: 'github',
@@ -45,11 +47,16 @@ function Login(): JSX.Element {
             console.error('[GITHUB OAUTH ERROR]:', err);
             setErrorMessage((err as Error).message);
         }
-        router.history.push(redirect);
+        setLoading(false);
     };
 
     return (
         <div className="flex h-screen w-full items-center justify-center">
+            {loading ?? (
+                <div className="absolute w-screen h-screen z-50 bg-[rgba(0,0,0,0.5)] flex justify-center items-center">
+                    {' '}
+                </div>
+            )}
             <div className="flex max-w-md flex-col items-center gap-6">
                 <div
                     className={`

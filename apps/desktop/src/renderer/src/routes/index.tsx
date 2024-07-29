@@ -36,7 +36,9 @@ export const Route = createFileRoute('/')({
         const r = context.replicache;
         if (!r) return {};
 
+        console.log('QUERYING WORKSPACE');
         const workspace = (await r.query(getWorkspace)) ?? null;
+        console.log('GOT WORKSPACE');
 
         return {
             workspace,
