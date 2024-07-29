@@ -14,14 +14,27 @@ import { useSubscribe } from 'replicache-react';
 let r: Replicache;
 
 async function getWorkspace(tx: ReadTransaction) {
-    const workspace = await tx.get<Workspace>('workspace');
-    return workspace;
+    const workspace = await tx
+        .scan<Workspace>({ prefix: 'workspace' })
+        .values()
+        .toArray();
+    return workspace[0];
 }
 
 export const Route = createFileRoute('/')({
+    beforeLoad({ context }) {
+        if (!context.session) {
+            throw redirect({
+                to: '/auth/login',
+                search: {
+                    redirect: location.href,
+                },
+            });
+        }
+    },
     loader: async ({ context }) => {
         const r = context.replicache;
-        if (!r) return;
+        if (!r) return {};
 
         const workspace = (await r.query(getWorkspace)) ?? null;
 

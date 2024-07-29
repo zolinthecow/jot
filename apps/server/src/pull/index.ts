@@ -3,6 +3,7 @@ import {
     type DBWorkspace,
     DBWorkspaceSchema,
 } from '@repo/database';
+import type { AuthUser } from '@supabase/supabase-js';
 import type { NextFunction, Request, Response } from 'express';
 import type {
     PatchOperation,
@@ -207,7 +208,11 @@ export async function handlePull(
     next: NextFunction,
 ): Promise<void> {
     try {
-        const pullResult = await handleWorkspaceGet(pool, 'abc123', req.body);
+        const pullResult = await handleWorkspaceGet(
+            pool,
+            (res.locals.user as AuthUser).id,
+            req.body,
+        );
         res.status(200).json(pullResult);
     } catch (err) {
         console.error('[ERROR IN PULL]:', err);
