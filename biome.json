@@ -1,23 +1,24 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "organizeImports": {
-    "enabled": true,
-    "ignore": ["apps/desktop/src/renderer/src/routeTree.gen.ts"]
-  },
-  "formatter": {
-    "indentStyle": "space",
-    "ignore": ["apps/desktop/src/renderer/src/routeTree.gen.ts"]
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single"
-    }
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
+    "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+    "organizeImports": {
+        "enabled": true,
+        "ignore": ["apps/desktop/src/renderer/src/routeTree.gen.ts"]
     },
-    "ignore": ["apps/desktop/src/renderer/src/routeTree.gen.ts"]
-  }
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "ignore": ["apps/desktop/src/renderer/src/routeTree.gen.ts"]
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true
+        },
+        "ignore": ["apps/desktop/src/renderer/src/routeTree.gen.ts"]
+    }
 }

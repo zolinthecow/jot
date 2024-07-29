@@ -1,12 +1,12 @@
 {
-  "name": "@repo/database",
-  "version": "0.0.0",
-  "private": true,
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "zod": "^3.23.8"
-  }
+    "name": "@repo/database",
+    "version": "0.0.0",
+    "private": true,
+    "license": "MIT",
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "zod": "^3.23.8"
+    }
 }

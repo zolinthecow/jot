@@ -1,4 +1,4 @@
 export type Workspace = {
-  path: string;
-  version: number;
+    path: string;
+    version: number;
 };
