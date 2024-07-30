@@ -1,3 +1,11 @@
+body {
+  -webkit-app-region: drag;
+}
+
+button, input, textarea, [role="button"] {
+  -webkit-app-region: no-drag;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

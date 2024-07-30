@@ -34,6 +34,13 @@ const WorkspaceHome: React.FC<Props> = ({ workspace, folders, files }) => {
         };
     }, []);
 
+    useEffect(() => {
+        window.electron.ipcRenderer.send(
+            'set-traffic-lights-visibility',
+            isSidebarVisible,
+        );
+    }, [isSidebarVisible]);
+
     return (
         <div className="w-full h-full flex">
             <Sidebar

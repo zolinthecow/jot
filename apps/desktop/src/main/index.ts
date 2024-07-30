@@ -3,9 +3,11 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { BrowserWindow, app, ipcMain, shell } from 'electron';
 import icon from '../../resources/icon.png?asset';
 
+let mainWindow: BrowserWindow | null = null;
+
 function createWindow(): void {
     // Create the browser window.
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 940,
         height: 700,
         show: false,
@@ -20,7 +22,8 @@ function createWindow(): void {
     });
 
     mainWindow.on('ready-to-show', () => {
-        mainWindow.show();
+        mainWindow?.show();
+        mainWindow?.setWindowButtonVisibility(false);
     });
 
     mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -51,9 +54,11 @@ app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window);
     });
 
-    // IPC test
-    ipcMain.on('ping', () => console.log('pong'));
-
+    ipcMain.on('set-traffic-lights-visibility', (_, isVisible: boolean) => {
+        if (mainWindow) {
+            mainWindow.setWindowButtonVisibility(isVisible);
+        }
+    });
     createWindow();
 
     app.on('activate', () => {
