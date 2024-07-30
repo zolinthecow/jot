@@ -25,21 +25,21 @@ export async function getAllUserFolders(
     params: GetAllUserFoldersParams,
 ): Promise<Readonly<Array<DBFolder>>> {
     return await tx.any(sql.type(DBFolderSchema)`
-        SELECT id, "parentFolderID", "workspaceID", name, "createdAt"
+        SELECT id, "parentFolderID", "workspaceID", name, type, "createdAt"
         FROM folders
         WHERE "workspaceID" = ${params.userID}::uuid
     `);
 }
 
-type GetAllFilesByIDParams = {
+type GetAllFoldersByIDParams = {
     IDs: Array<string>;
 };
 export async function getAllFoldersByID(
     tx: DatabaseTransactionConnection,
-    params: GetAllFilesByIDParams,
+    params: GetAllFoldersByIDParams,
 ): Promise<Readonly<Array<DBFolder>>> {
     return await tx.any(sql.type(DBFolderSchema)`
-        SELECT id, "parentFolderID", "workspaceID", name, "createdAt"
+        SELECT id, "parentFolderID", "workspaceID", name, type, "createdAt"
         FROM folders
         WHERE id = ANY(${sql.array(params.IDs, 'uuid')})
     `);

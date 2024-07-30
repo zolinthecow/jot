@@ -91,8 +91,8 @@ export async function _handlePull(
         // Build next CVR
         const nextCVR: CVR = {
             workspace: cvrEntriesFromSearch(userWorkspaceSearch),
-            folders: cvrEntriesFromSearch(userFolderSearch),
-            files: cvrEntriesFromSearch(userFileSearch),
+            folder: cvrEntriesFromSearch(userFolderSearch),
+            file: cvrEntriesFromSearch(userFileSearch),
             client: cvrEntriesFromSearch(clientMeta),
         };
         console.log('NEXT CVR:', nextCVR);
@@ -112,9 +112,9 @@ export async function _handlePull(
         if (userWorkspace) {
             newWorkspace.push(userWorkspace);
         }
-        const newFiles = await getAllFilesByID(tx, { IDs: diff.files.puts });
+        const newFiles = await getAllFilesByID(tx, { IDs: diff.file.puts });
         const newFolders = await getAllFoldersByID(tx, {
-            IDs: diff.folders.puts,
+            IDs: diff.folder.puts,
         });
 
         // Get list of clients that are changed
@@ -146,12 +146,12 @@ export async function _handlePull(
                     dels: diff.workspace.dels,
                     puts: newWorkspace,
                 },
-                folders: {
-                    dels: diff.folders.dels,
+                folder: {
+                    dels: diff.folder.dels,
                     puts: newFolders,
                 },
-                files: {
-                    dels: diff.files.dels,
+                file: {
+                    dels: diff.file.dels,
                     puts: newFiles,
                 },
             },

@@ -9,11 +9,12 @@ import type {
     ReplicacheFolder,
     ReplicacheWorkspace,
 } from '@repo/replicache-schema';
+import type { DeepReadonlyObject } from 'replicache';
 
 type Props = {
     workspace: ReplicacheWorkspace;
     folders: Array<ReplicacheFolder>;
-    files: Array<ReplicacheFile>;
+    files: Array<DeepReadonlyObject<ReplicacheFile>>;
 };
 
 const WorkspaceHome: React.FC<Props> = ({ workspace, folders, files }) => {

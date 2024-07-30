@@ -28,6 +28,7 @@ export async function createFolder(
     }
 
     const hasParentFolder = args.folder.parentFolderID !== undefined;
+    console.log('CREATING FOLDER');
     await tx.one(sql.type(DBFolderSchema)`
         ${
             args.folder.parentFolderID != null
@@ -41,12 +42,25 @@ export async function createFolder(
         `
                 : sql.fragment``
         }
+        ${
+            args.folder.type === 'fleeting'
+                ? sql.type(DBFolderSchema)`
+        WITH fleeting_check AS (
+            SELECT 1
+            FROM folders
+            WHERE "workspaceID" = ${args.folder.workspaceID}
+            AND "type" = 'fleeting'
+        )
+        `
+                : sql.fragment``
+        }
         INSERT INTO folders (
             id,
             "userID",
             "workspaceID",
             "parentFolderID",
             name,
+            type,
             "createdAt"
         )
         SELECT
@@ -55,6 +69,7 @@ export async function createFolder(
             ${args.folder.workspaceID},
             ${args.folder.parentFolderID ?? sql.fragment`NULL`},
             ${args.folder.name},
+            ${args.folder.type},
             CURRENT_TIMESTAMP
         ${
             hasParentFolder
@@ -63,8 +78,23 @@ export async function createFolder(
         `
                 : sql.fragment``
         }
+        ${
+            hasParentFolder && args.folder.type === 'fleeting'
+                ? sql.fragment`
+        AND
+        `
+                : sql.fragment``
+        }
+        ${
+            args.folder.type === 'fleeting'
+                ? sql.fragment`
+        WHERE NOT EXISTS (SELECT 1 FROM fleeting_check)     
+        `
+                : sql.fragment``
+        }
         RETURNING *
     `);
+    console.log('CREATED FOLDER');
 
     return {
         workspaceIDs: [args.folder.workspaceID],
@@ -155,14 +185,19 @@ export async function deleteFolder(
     const result = await tx.one(sql.type(DeleteResultSchema)`
         WITH RECURSIVE
         root_folder AS (
-            SELECT id, "workspaceID"
+            SELECT id, "workspaceID", type
             FROM folders
             WHERE id = ${args.id} AND "userID" = ${userID}
         ),
+        check_fleeting AS (
+            SELECT CASE WHEN type = 'fleeting' THEN true ELSE false END AS is_fleeting
+            FROM root_folder
+        )
         folder_tree AS (
             SELECT id, "parentFolderID", "workspaceID"
-            FROM root_folder
-            UNION ALL
+            FROM folders
+            WHERE id = (SELECT id FROM root_folder)
+                AND NOT EXISTS (SELECT 1 FROM check_fleeting WHERE is_fleeting)
             SELECT f.id, f."parentFolderID", f."workspaceID"
             FROM folders f
             JOIN folder_tree ft ON f."parentFolderID" = ft.id

@@ -5,8 +5,9 @@ import { ChevronDown, ChevronRight, File, Folder } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { ReplicacheFile, ReplicacheFolder } from '@repo/replicache-schema';
+import type { DeepReadonlyObject } from 'replicache';
 
-type TreeItem = ReplicacheFolder | ReplicacheFile;
+type TreeItem = ReplicacheFolder | DeepReadonlyObject<ReplicacheFile>;
 
 interface TreeNodeProps {
     item: TreeItem;
@@ -45,7 +46,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, children, level }) => {
 
 type Props = {
     folders: Array<ReplicacheFolder>;
-    files: Array<ReplicacheFile>;
+    files: Array<DeepReadonlyObject<ReplicacheFile>>;
 };
 const FolderTree: React.FC<Props> = ({ folders, files }) => {
     const buildTree = (
@@ -54,10 +55,9 @@ const FolderTree: React.FC<Props> = ({ folders, files }) => {
     ): React.ReactNode => {
         const childFolders = folders.filter((folder) =>
             parentId === null
-                ? folder.parentFolderID === undefined
+                ? folder.parentFolderID == null
                 : folder.parentFolderID === parentId,
         );
-        console.log('CHILDREN OF', parentId, childFolders);
         const childFiles = files.filter((file) =>
             file.parentFolderIDs?.includes(parentId || ''),
         );

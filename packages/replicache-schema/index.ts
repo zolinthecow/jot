@@ -41,7 +41,7 @@ export const CreateFolderArgsSchema = z.object({
 export type CreateFolderArgs = z.infer<typeof CreateFolderArgsSchema>;
 
 export const UpdateFolderArgsSchema = z.object({
-    update: zUpdate(ReplicacheFolderSchema),
+    update: zUpdate(ReplicacheFolderSchema.omit({ type: true })),
 });
 export type UpdateFolderArgs = z.infer<typeof UpdateFolderArgsSchema>;
 

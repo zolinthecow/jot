@@ -31,13 +31,13 @@ export async function maybeGetWorkspace(
     let workspace: DBWorkspace | null;
     if ('userID' in params) {
         workspace = await tx.maybeOne(sql.type(DBWorkspaceSchema)`
-            SELECT id "userID", "path", "name", "createdAt"
+            SELECT id, "userID", "path", "name", "createdAt"
             FROM workspaces
             WHERE "userID" = ${params.userID}::uuid
         `);
     } else {
         workspace = await tx.maybeOne(sql.type(DBWorkspaceSchema)`
-            SELECT id "userID", "path", "name", "createdAt"
+            SELECT id, "userID", "path", "name", "createdAt"
             FROM workspaces
             WHERE id = ${params.id}::uuid
         `);

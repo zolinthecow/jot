@@ -14,7 +14,17 @@ export async function createFolder(
     tx: WriteTransaction,
     _args: CreateFolderArgs,
 ) {
+    console.log('CREATE FOLDER', _args);
     const args = CreateFolderArgsSchema.parse(_args);
+    if (args.folder.type === 'fleeting') {
+        const existingFolders = (await tx
+            .scan({ prefix: 'folder/' })
+            .values()
+            .toArray()) as Array<ReplicacheFolder>;
+        if (existingFolders.find((f) => f.type === 'fleeting')) {
+            throw new Error('Cannot create second fleeting folder');
+        }
+    }
     await tx.set(`folder/${args.folder.id}`, args.folder);
 }
 
@@ -54,7 +64,7 @@ export async function deleteFolder(
         const folderKey = `folder/${folderId}`;
         const folder = await tx.get<ReplicacheFolder>(folderKey);
 
-        if (!folder) {
+        if (!folder || folder.type === 'fleeting') {
             return;
         }
 

@@ -15,13 +15,13 @@ import type {
     ReplicacheWorkspace,
 } from '@repo/replicache-schema';
 
-import { dummyFiles, dummyFolders } from './dummyData';
+import type { DeepReadonlyObject } from 'replicache';
 import FolderTree from './folderTree';
 
 type SidebarProps = {
     workspace: ReplicacheWorkspace;
     folders: Array<ReplicacheFolder>;
-    files: Array<ReplicacheFile>;
+    files: Array<DeepReadonlyObject<ReplicacheFile>>;
     isVisible: boolean;
 };
 const Sidebar: React.FC<SidebarProps> = ({
@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <hr className="mt-4 mb-4 bg-stone-300 border-stone-300" />
             <div className="text-muted-foreground overflow-ellipsis">
-                <FolderTree folders={dummyFolders} files={dummyFiles} />
+                <FolderTree folders={folders} files={files} />
             </div>
         </div>
     );

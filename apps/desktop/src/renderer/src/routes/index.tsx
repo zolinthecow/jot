@@ -12,12 +12,13 @@ import {
     useRouteContext,
 } from '@tanstack/react-router';
 import type { JSX } from 'react';
-import type { ReadTransaction } from 'replicache';
+import type { DeepReadonlyObject, ReadTransaction } from 'replicache';
 import { useSubscribe } from 'replicache-react';
+import { v4 as uuid } from 'uuid';
 
 async function getWorkspace(tx: ReadTransaction) {
     const workspaces = await tx
-        .scan<ReplicacheWorkspace>({ prefix: 'workspace' })
+        .scan<ReplicacheWorkspace>({ prefix: 'workspace/' })
         .values()
         .toArray();
     if (workspaces.length === 0) return null;
@@ -51,7 +52,8 @@ export const Route = createFileRoute('/')({
     },
     loader: async ({ context }) => {
         const r = context.replicache;
-        if (!r)
+        const session = context.session;
+        if (!r || !session)
             return {
                 workspace: null,
                 folders: [],
@@ -63,6 +65,21 @@ export const Route = createFileRoute('/')({
             r.query(getFolders),
             r.query(getFiles),
         ]);
+        if (workspace && !folders.find((f) => f.type === 'fleeting')) {
+            const fleetingFolder: DeepReadonlyObject<ReplicacheFolder> = {
+                id: uuid(),
+                type: 'fleeting',
+                userID: session.user.id,
+                workspaceID: (workspace as ReplicacheWorkspace).id,
+                name: 'Fleeting Ideas',
+            };
+            console.log('CREATING FLEETING FOLDER');
+            r.mutate.createFolder({
+                folder: fleetingFolder,
+            });
+            console.log('CREATED FLEETING FOLDER');
+            folders.push(fleetingFolder);
+        }
 
         return {
             workspace,
