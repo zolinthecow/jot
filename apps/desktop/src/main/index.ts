@@ -6,9 +6,11 @@ import icon from '../../resources/icon.png?asset';
 function createWindow(): void {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
-        width: 900,
-        height: 670,
+        width: 940,
+        height: 700,
         show: false,
+        titleBarStyle: 'hidden',
+        trafficLightPosition: { x: 16, y: 12 },
         autoHideMenuBar: true,
         ...(process.platform === 'linux' ? { icon } : {}),
         webPreferences: {

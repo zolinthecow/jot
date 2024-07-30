@@ -16,7 +16,7 @@ import type {
 } from '@repo/replicache-schema';
 
 import type { DeepReadonlyObject } from 'replicache';
-import FolderTree from './folderTree';
+import FolderTree from './FolderTree';
 
 type SidebarProps = {
     workspace: ReplicacheWorkspace;
@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div
             className={`transition-all duration-150 ease-in-out h-full ${isVisible ? 'w-1/5 min-w-44 opacity-100 pl-2 pr-4' : 'w-0 min-w-0 opacity-0 pl-0 pr-0'} overflow-hidden rounded-md`}
         >
-            <h1 className="text-base text-muted-foreground font-semibold mt-2">
+            <h1 className="text-base text-muted-foreground font-semibold mt-6">
                 {workspace.name}
             </h1>
             <div className="flex w-full gap-2 flex-row mt-2">
