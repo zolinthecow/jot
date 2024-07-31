@@ -12,6 +12,7 @@ import {
     useRouteContext,
 } from '@tanstack/react-router';
 import type { JSX } from 'react';
+import type { MosaicNode } from 'react-mosaic-component';
 import type { DeepReadonlyObject, ReadTransaction } from 'replicache';
 import { useSubscribe } from 'replicache-react';
 import { v4 as uuid } from 'uuid';
@@ -60,10 +61,11 @@ export const Route = createFileRoute('/')({
                 files: [],
             };
 
-        const [workspace, folders, files] = await Promise.all([
+        const [workspace, folders, files, _mosaicState] = await Promise.all([
             r.query(getWorkspace),
             r.query(getFolders),
             r.query(getFiles),
+            window.api.getFromStorage('mosaicState'),
         ]);
         if (workspace && !folders.find((f) => f.type === 'fleeting')) {
             const fleetingFolder: DeepReadonlyObject<ReplicacheFolder> = {
@@ -80,11 +82,21 @@ export const Route = createFileRoute('/')({
             console.log('CREATED FLEETING FOLDER');
             folders.push(fleetingFolder);
         }
+        let mosaicState: MosaicNode<string>;
+        if (
+            _mosaicState == null ||
+            Object.getOwnPropertyNames(_mosaicState).length === 0
+        ) {
+            mosaicState = '1';
+        } else {
+            mosaicState = _mosaicState as MosaicNode<string>;
+        }
 
         return {
             workspace,
             folders,
             files,
+            mosaicState,
         };
     },
     component: Index,
@@ -119,6 +131,7 @@ function Index(): JSX.Element {
                     workspace={workspace}
                     folders={folders}
                     files={files}
+                    mosaicState={loaderData.mosaicState ?? '1'}
                 />
             )}
         </div>

@@ -10,15 +10,22 @@ import type {
     ReplicacheFolder,
     ReplicacheWorkspace,
 } from '@repo/replicache-schema';
+import type { MosaicNode } from 'react-mosaic-component';
 import type { DeepReadonlyObject } from 'replicache';
 
 type Props = {
     workspace: ReplicacheWorkspace;
     folders: Array<ReplicacheFolder>;
     files: Array<DeepReadonlyObject<ReplicacheFile>>;
+    mosaicState: MosaicNode<string>;
 };
 
-const WorkspaceHome: React.FC<Props> = ({ workspace, folders, files }) => {
+const WorkspaceHome: React.FC<Props> = ({
+    workspace,
+    folders,
+    files,
+    mosaicState,
+}) => {
     const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
 
     useEffect(() => {
@@ -49,7 +56,12 @@ const WorkspaceHome: React.FC<Props> = ({ workspace, folders, files }) => {
                 files={files}
                 isVisible={isSidebarVisible}
             />
-            <Layout workspace={workspace} folders={folders} files={files} />
+            <Layout
+                workspace={workspace}
+                folders={folders}
+                files={files}
+                mosaicState={mosaicState}
+            />
         </div>
     );
 };

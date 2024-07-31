@@ -1,14 +1,11 @@
-import { defaultKeymap } from '@codemirror/commands';
-import { EditorState } from '@codemirror/state';
-import { EditorView, keymap } from '@codemirror/view';
 import type {
     ReplicacheFile,
     ReplicacheFolder,
     ReplicacheWorkspace,
 } from '@repo/replicache-schema';
 import type React from 'react';
-import { useState } from 'react';
-import { Mosaic, type MosaicNode, MosaicWindow } from 'react-mosaic-component';
+import { useEffect, useMemo, useState } from 'react';
+import { Mosaic, type MosaicNode } from 'react-mosaic-component';
 import type { DeepReadonlyObject } from 'replicache';
 
 import WorkspacePane from './WorkspacePane';
@@ -20,24 +17,41 @@ type Props = {
     workspace: ReplicacheWorkspace;
     folders: Array<ReplicacheFolder>;
     files: Array<DeepReadonlyObject<ReplicacheFile>>;
+    mosaicState: MosaicNode<string>;
 };
 
-const Layout: React.FC<Props> = ({ workspace, folders, files }) => {
+const countPanes = (node: MosaicNode<string> | null): number => {
+    if (node === null) return 0;
+    if (typeof node === 'string') return 1;
+    return countPanes(node.first) + countPanes(node.second);
+};
+
+const Layout: React.FC<Props> = ({
+    workspace,
+    folders,
+    files,
+    mosaicState: _mosaicState,
+}) => {
     const [mosaicState, setMosaicState] = useState<MosaicNode<string> | null>(
-        '1',
+        _mosaicState,
     );
 
-    const [paneCount, setPaneCount] = useState(2);
+    useEffect(() => {
+        if (mosaicState) {
+            window.api
+                .setStorage('mosaicState', mosaicState)
+                .catch((err) => console.error('[MOSAIC STATE ERR]:', err));
+        }
+    }, [mosaicState]);
+
+    const paneCount = useMemo(() => countPanes(mosaicState), [mosaicState]);
 
     const createNewPane = () => {
-        const newPaneId = (paneCount + 1).toString();
-        setPaneCount(paneCount + 1);
-        return newPaneId;
+        return (paneCount + 1).toString();
     };
 
     const splitPane = (path: Array<string>, direction: 'row' | 'column') => {
         const newPaneId = createNewPane();
-        console.log(newPaneId);
         setMosaicState((currentState) => {
             if (typeof currentState === 'string') {
                 // If it's the initial single pane, create a new split
@@ -64,7 +78,6 @@ const Layout: React.FC<Props> = ({ workspace, folders, files }) => {
             return updatedState;
         });
     };
-    console.log(mosaicState);
 
     return (
         <div className="transition-all duration-150 ease-in-out flex flex-1 gap-2 relative">
