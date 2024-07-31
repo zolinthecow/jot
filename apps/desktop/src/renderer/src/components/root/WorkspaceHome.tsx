@@ -1,8 +1,8 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
 
+import Layout from './LayoutManager/Layout';
 import Sidebar from './Sidebar';
-import WorkspacePane from './WorkspacePane/WorkspacePane';
 
 import * as KeyboardListener from '@/lib/keyboardListener';
 import type {
@@ -42,20 +42,14 @@ const WorkspaceHome: React.FC<Props> = ({ workspace, folders, files }) => {
     }, [isSidebarVisible]);
 
     return (
-        <div className="w-full h-full flex">
+        <div className="w-full h-full flex rounded-md no-drag">
             <Sidebar
                 workspace={workspace}
                 folders={folders}
                 files={files}
                 isVisible={isSidebarVisible}
             />
-            <div className="transition-all duration-150 ease-in-out flex flex-1 gap-2">
-                <WorkspacePane
-                    workspace={workspace}
-                    folders={folders}
-                    files={files}
-                />
-            </div>
+            <Layout workspace={workspace} folders={folders} files={files} />
         </div>
     );
 };

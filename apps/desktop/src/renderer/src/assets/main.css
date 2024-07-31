@@ -1,8 +1,8 @@
-body {
+body, .draggable {
   -webkit-app-region: drag;
 }
 
-button, input, textarea, [role="button"] {
+.no-drag, button, input, textarea, [role="button"] {
   -webkit-app-region: no-drag;
 }
 
@@ -23,7 +23,7 @@ button, input, textarea, [role="button"] {
     --secondary: 107 167 209;
     --secondary-foreground: 240 240 240;
     --muted: 238 232 213;
-    --muted-foreground: 147 161 161;
+    --muted-foreground: 137 151 151;
     --accent: 230 224 211;
     --accent-foreground: 7 54 66;
     --destructive: 220 50 47;

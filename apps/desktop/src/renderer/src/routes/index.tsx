@@ -111,7 +111,7 @@ function Index(): JSX.Element {
     }
 
     return (
-        <div className="w-full h-full flex bg-muted p-2">
+        <div className="w-full h-full flex bg-muted p-2 draggable">
             {workspace == null ? (
                 <CreateWorkspaceDialog r={r} session={session} />
             ) : (
