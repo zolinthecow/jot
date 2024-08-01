@@ -75,11 +75,9 @@ export const Route = createFileRoute('/')({
                 workspaceID: (workspace as ReplicacheWorkspace).id,
                 name: 'Fleeting Ideas',
             };
-            console.log('CREATING FLEETING FOLDER');
             r.mutate.createFolder({
                 folder: fleetingFolder,
             });
-            console.log('CREATED FLEETING FOLDER');
             folders.push(fleetingFolder);
         }
         let mosaicState: MosaicNode<string>;
