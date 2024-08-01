@@ -41,6 +41,7 @@
         "electron-store": "^10.0.0",
         "electron-updater": "^6.1.7",
         "lucide-react": "^0.416.0",
+        "postcss-nested": "^6.2.0",
         "prosemirror-markdown": "^1.13.0",
         "prosemirror-schema-basic": "^1.2.3",
         "prosemirror-schema-list": "^1.4.1",

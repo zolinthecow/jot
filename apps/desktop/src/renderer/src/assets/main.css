@@ -77,25 +77,10 @@ body, .draggable {
   }
 }
 
-/* Codemirror */
-.cm-header > span {
-  text-decoration: none !important;
-}
-.cm-header-1 {
-  @apply text-4xl
-}
-.cm-header-2 {
-  @apply text-3xl
-}
-.cm-header-3 {
-  @apply text-2xl
-}
-.cm-header-4 {
-  @apply text-xl
-}
-.cm-header-5 {
-  @apply text-lg
-}
-.cm-header-6 {
-  @apply text-base
+.ProseMirror {
+  @apply p-2;
+
+  & h1 {
+    @apply text-4xl font-bold;
+  }
 }
