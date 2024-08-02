@@ -78,7 +78,22 @@ This is a **markdown** editor.
 
     2. List item b.
 
-    This paragraph belongs to item two of the outer list.`;
+    This paragraph belongs to item two of the outer list.
+    
+This is a [link](https://google.com)
+
+- [ ] checkbox
+- [x] done
+  
+> quote
+ 
+\`code\`
+
+
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |`;
 
 const initializeEditor = (element: HTMLDivElement) => {
     return new MarkdownView(element, SAMPLE_MARKDOWN);

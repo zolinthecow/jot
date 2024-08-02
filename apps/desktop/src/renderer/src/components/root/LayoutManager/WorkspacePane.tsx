@@ -11,8 +11,9 @@ import type {
 } from '@repo/replicache-schema';
 import type { DeepReadonlyObject } from 'replicache';
 
+import { MilkdownEditorWrapper } from './Milkdown';
 // import initializeEditor from './CodeMirror';
-import initializeEditor, { type MarkdownView } from './ProseMirror';
+import initializeProsemirrorEditor, { type MarkdownView } from './ProseMirror';
 
 type Props = {
     workspace: ReplicacheWorkspace;
@@ -37,12 +38,13 @@ const WorkspacePane: React.FC<Props> = ({
 
     const _initializeEditor = (element: HTMLDivElement | null) => {
         if (!element || editorView) return;
-        setEditorView(initializeEditor(element));
+        setEditorView(initializeProsemirrorEditor(element));
     };
 
     return (
-        <div className="bg-background rounded-md h-full flex flex-col">
-            <div className="flex-grow h-full w-full" ref={_initializeEditor} />
+        <div className="bg-background rounded-md h-full flex flex-col overflow-y-scroll">
+            {/* <div className="flex-grow h-full w-full" ref={_initializeEditor} /> */}
+            <MilkdownEditorWrapper />
         </div>
     );
 };

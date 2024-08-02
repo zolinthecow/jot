@@ -23,7 +23,7 @@ body, .draggable {
     --secondary: 107 167 209;
     --secondary-foreground: 240 240 240;
     --muted: 238 232 213;
-    --muted-foreground: 137 151 151;
+    --muted-foreground: 127 141 141;
     --accent: 230 224 211;
     --accent-foreground: 7 54 66;
     --destructive: 220 50 47;
@@ -78,9 +78,110 @@ body, .draggable {
 }
 
 .ProseMirror {
+  outline: none !important;
+}
+
+.milkdown {
   @apply p-2;
 
-  & h1 {
-    @apply text-4xl font-bold;
+  h1 {
+    @apply text-4xl font-bold mb-4 mt-6;
+  }
+
+  h2 {
+    @apply text-3xl font-bold mb-3 mt-5;
+  }
+
+  h3 {
+    @apply text-2xl font-bold mb-2 mt-4;
+  }
+
+  p {
+    @apply mb-4;
+  }
+
+  strong {
+    @apply font-bold;
+  }
+
+  a {
+    @apply text-blue-600 dark:text-blue-400 hover:underline;
+  }
+
+  ul, ol {
+    @apply mb-4 pl-8;
+  }
+
+  ul {
+    @apply list-disc;
+  }
+
+  ol {
+    @apply list-decimal;
+  }
+
+  li {
+    @apply mb-2;
+
+    p {
+      @apply mb-2;
+    }
+
+    &[data-item-type="task"] {
+      @apply flex items-start;
+
+      &::before {
+        content: '';
+        @apply w-5 h-5 border border-gray-400 rounded mr-2 mt-1 flex-shrink-0;
+      }
+
+      &[data-checked="true"]::before {
+        @apply bg-blue-500 border-blue-500;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23fff'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' /%3E%3C/svg%3E");
+      }
+    }
+  }
+
+  blockquote {
+    @apply pl-4 border-l-4 border-gray-300 dark:border-gray-600 italic my-4;
+  }
+
+  code {
+    @apply bg-muted rounded px-1 py-0.5 font-mono text-sm;
+  }
+
+  pre {
+    @apply bg-muted rounded p-4 mb-4 overflow-x-auto;
+
+    code {
+      @apply bg-transparent p-0;
+    }
+  }
+
+  .tableWrapper {
+    @apply overflow-x-auto mb-4;
+  }
+
+  table {
+    @apply w-full border-collapse;
+
+    th, td {
+      @apply border border-gray-300 dark:border-gray-600 px-4 py-2 text-left;
+    }
+
+    th {
+      @apply bg-black/20 dark:bg-white/20 font-bold;
+    }
+
+    tr:nth-child(even) {
+      @apply bg-muted;
+    }
+  }
+
+  .header-syntax {
+    color: #888;
+    font-weight: normal;
+    user-select: text;
+    margin-right: 0.25em;
   }
 }
