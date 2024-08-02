@@ -116,13 +116,17 @@ function adjustHeaders(
     }
 
     if (node.type.name === 'heading' || node.type.name === 'paragraph') {
-        console.log('Cursor is in heading or paragraph node', node.textContent);
+        console.log(
+            'Cursor is in heading or paragraph node',
+            node.textContent.replaceAll(' ', '_'),
+        );
 
         const { newLevel, newText } = parseHeaderContent(
             node.textContent,
             node,
             oldNode,
         );
+        console.log(newLevel, newText);
 
         if (
             newLevel !== (node.attrs.level || 0) ||
@@ -170,21 +174,25 @@ function determineNewCursorPosition(
 ): number {
     const relativeOldCursorPos = oldCursorPos - nodeStartPos - 1;
 
-    const newTextHashMatch = newText.match(/^#+/);
-    if (
-        newText.startsWith('#') &&
-        !oldText.startsWith('#') &&
-        newTextHashMatch
-    ) {
-        // If we've added '#' at the start, place cursor after the '#' and space
-        const hashCount = newTextHashMatch[0].length;
-        return nodeStartPos + 1 + hashCount + 1; // +1 for space after '#'
+    const newTextHashMatch = newText.match(/^(#+)([\s\u00A0]*)/);
+    if (newTextHashMatch) {
+        const [, hashes, space] = newTextHashMatch;
+        const hashAndSpaceLength = hashes.length + space.length;
+
+        if (!oldText.startsWith('#')) {
+            // New heading created, place cursor after the space
+            return nodeStartPos + 1 + hashAndSpaceLength;
+        }
+        if (relativeOldCursorPos <= hashAndSpaceLength) {
+            // Cursor was in the hash or space area, keep it there
+            return (
+                nodeStartPos +
+                1 +
+                Math.min(relativeOldCursorPos, hashAndSpaceLength)
+            );
+        }
     }
-    const newTextHashAndSpaceMatch = newText.match(/^#+\s/);
-    if (newTextHashAndSpaceMatch && !oldText.match(/^#+\s/)) {
-        // If we've added a space after existing '#', place cursor after the space
-        return nodeStartPos + 1 + newTextHashAndSpaceMatch[0].length;
-    }
+
     // For other cases, try to maintain the cursor position relative to the content
     return nodeStartPos + 1 + Math.min(relativeOldCursorPos, newText.length);
 }
@@ -194,8 +202,9 @@ function parseHeaderContent(
     currentNode: ProsemirrorNode,
     oldNode: ProsemirrorNode | null,
 ): { newLevel: number; newText: string } {
-    const headerRegex = /^(#+)(\s*)(.*)$/;
+    const headerRegex = /^(#+)([\s\u00A0]*)(.*)$/;
     const match = text.match(headerRegex);
+    console.log('MATCH', match);
 
     // This could be a few things:
     // 1. Newly focused heading. In this case, we need to add the #s
@@ -217,9 +226,11 @@ function parseHeaderContent(
             const [, hashes, space, content] = match;
             if (space === '') {
                 // Caveat for 4. Change to para.
+                console.log('DEAD');
                 return { newLevel: 0, newText: text };
             }
             const newLevel = Math.min(Math.max(hashes.length, 1), 6);
+            console.log('LVL', newLevel);
             return { newLevel, newText: text };
         }
         // Manual 5. If you delete the hashes then it should just become a para
@@ -231,7 +242,7 @@ function parseHeaderContent(
         const currentLevel = currentNode.attrs.level as number;
         return {
             newLevel: currentLevel,
-            newText: `${'#'.repeat(currentLevel)} ${text}`,
+            newText: `${'#'.repeat(currentLevel)}\u00A0${text}`,
         };
     }
     // 4.
@@ -247,14 +258,14 @@ function parseHeaderContent(
         currentNode.type.name === 'heading' &&
         oldNode?.type.name === 'paragraph'
     ) {
-        return { newLevel: 1, newText: text };
+        return { newLevel: 1, newText: `#\u00A0${text}` };
     }
     // Otherwise we just assume its a paragraph and don't do anything
     return { newLevel: 0, newText: text };
 }
 
 function removeHashesFromHeading(text: string): string {
-    return text.replace(/^#+\s*/, '');
+    return text.replace(/^#+[\s\u00A0]*/, '');
 }
 
 const MilkdownEditor: React.FC = () => {
