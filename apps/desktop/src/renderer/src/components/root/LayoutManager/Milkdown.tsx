@@ -5,6 +5,7 @@ import { gfm } from '@milkdown/preset-gfm';
 import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
 import { nord } from '@milkdown/theme-nord';
 import type React from 'react';
+import codeBlockSyntaxPlugin from './milkdownPlugins/codeBlockSyntaxPlugin';
 import headerSyntaxPlugin from './milkdownPlugins/headerSyntaxPlugin';
 
 const SAMPLE_MARKDOWN = `# Hello
@@ -58,7 +59,7 @@ const MilkdownEditor: React.FC = () => {
             .use(commonmark)
             .use(gfm)
             .use(history)
-            .use([headerSyntaxPlugin]),
+            .use([headerSyntaxPlugin, codeBlockSyntaxPlugin]),
     );
 
     return <Milkdown />;

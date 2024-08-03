@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { defaultKeymap } from '@codemirror/commands';
 import { EditorState } from '@codemirror/state';
@@ -32,6 +32,7 @@ const WorkspacePane: React.FC<Props> = ({
     path,
     splitPane,
 }) => {
+    const editorWrapperRef = useRef<HTMLDivElement>(null);
     const [editorView, setEditorView] = useState<
         EditorView | MarkdownView | null
     >(null);
@@ -41,8 +42,29 @@ const WorkspacePane: React.FC<Props> = ({
         setEditorView(initializeProsemirrorEditor(element));
     };
 
+    useEffect(() => {
+        if (editorWrapperRef.current) {
+            editorWrapperRef.current.addEventListener('click', (event) => {
+                const target = event.target as HTMLElement;
+                if (
+                    target.tagName === 'A' &&
+                    (event.metaKey || event.ctrlKey)
+                ) {
+                    event.preventDefault();
+                    const href = target.getAttribute('href');
+                    if (href) {
+                        window.open(href);
+                    }
+                }
+            });
+        }
+    }, []);
+
     return (
-        <div className="bg-background rounded-md h-full flex flex-col overflow-y-scroll">
+        <div
+            ref={editorWrapperRef}
+            className="bg-background rounded-md h-full flex flex-col overflow-y-scroll"
+        >
             {/* <div className="flex-grow h-full w-full" ref={_initializeEditor} /> */}
             <MilkdownEditorWrapper />
         </div>
